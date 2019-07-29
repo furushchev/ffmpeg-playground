@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ffmpeg_sample)
+project(ffmpeg_playground)
 add_compile_options(-std=c++11)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
