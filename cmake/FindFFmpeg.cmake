@@ -1,148 +1,74 @@
-# - Try to find ffmpeg libraries (libavcodec, libavformat and libavutil)
-# Once done this will define
-#
-# FFMPEG_FOUND - system has ffmpeg or libav
-# FFMPEG_INCLUDE_DIR - the ffmpeg include directory
-# FFMPEG_LIBRARIES - Link these to use ffmpeg
-# FFMPEG_LIBAVCODEC
-# FFMPEG_LIBAVFORMAT
-# FFMPEG_LIBAVUTIL
-#
-# Copyright (c) 2008 Andreas Schneider <mail@cynapses.org>
-# Modified for other libraries by Lasse Kärkkäinen <tronic>
-# Modified for Hedgewars by Stepik777
-# Modified for FFmpeg-example Tuukka Pasanen 2018
-#
-# Redistribution and use is allowed according to the terms of the New
-# BSD license.
-#
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(FFmpeg_libavcodec  libavcodec)
+if (FFmpeg_libavcodec_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libavcodec_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libavcodec_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libavcodec_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libavformat  libavformat)
+if (FFmpeg_libavformat_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libavformat_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libavformat_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libavformat_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libavutil   libavutil)
+if (FFmpeg_libavutil_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libavutil_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libavutil_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libavutil_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libavfilter   libavfilter)
+if (FFmpeg_libavfilter_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libavfilter_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libavfilter_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libavfilter_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libavdevice   libavdevice)
+if (FFmpeg_libavdevice_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libavdevice_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libavdevice_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libavdevice_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libswresample   libswresample)
+if (FFmpeg_libswresample_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libswresample_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libswresample_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libswresample_LIBRARY_DIRS})
+endif()
+
+pkg_check_modules(FFmpeg_libswscale libswscale)
+if (FFmpeg_libswscale_FOUND)
+  list(APPEND FFmpeg_INCLUDE_DIRS ${FFmpeg_libswscale_INCLUDE_DIRS})
+  list(APPEND FFmpeg_LIBRARIES ${FFmpeg_libswscale_LIBRARIES})
+  list(APPEND FFmpeg_LIBRARY_DIRS ${FFmpeg_libswscale_LIBRARY_DIRS})
+endif()
+
+if (FFmpeg_libavcodec_FOUND OR
+    FFmpeg_libavformat_FOUND OR
+    FFmpeg_libavutil_FOUND OR
+    FFmpeg_libavfilter_FOUND OR
+    FFmpeg_libavdevice_FOUND OR
+    FFmpeg_libswresample_FOUND OR
+    FFmpeg_libswscale_FOUND)
+  set(FFmpeg_FOUND TRUE)
+  #
+  list(REMOVE_DUPLICATES FFmpeg_INCLUDE_DIRS)
+  list(REMOVE_DUPLICATES FFmpeg_LIBRARIES)
+  list(REMOVE_DUPLICATES FFmpeg_LIBRARY_DIRS)
+  #
+  message(STATUS "Found FFmpeg Library directories: ${FFmpeg_LIBRARY_DIRS}")
+  link_directories(${FFmpeg_LIBRARY_DIRS})
+endif()
 
 include(FindPackageHandleStandardArgs)
 
-find_package_handle_standard_args(FFMPEG
-  FOUND_VAR FFMPEG_FOUND
-  REQUIRED_VARS FFMPEG_LIBRARY FFMPEG_INCLUDE_DIR
-  VERSION_VAR FFMPEG_VERSION
-  )
-
-if(FFMPEG_LIBRARIES AND FFMPEG_INCLUDE_DIR)
-  # in cache already
-  set(FFMPEG_FOUND TRUE)
-else()
-  # use pkg-config to get the directories and then use these values
-  # in the FIND_PATH() and FIND_LIBRARY() calls
-  find_package(PkgConfig)
-  if(PKG_CONFIG_FOUND)
-    pkg_check_modules(_FFMPEG_AVCODEC libavcodec)
-    pkg_check_modules(_FFMPEG_AVFORMAT libavformat)
-    pkg_check_modules(_FFMPEG_AVDEVICE libavdevice)
-    pkg_check_modules(_FFMPEG_AVFILTER libavfilter)
-    pkg_check_modules(_FFMPEG_POSTPROC libpostproc)
-    pkg_check_modules(_FFMPEG_AVUTIL libavutil)
-    pkg_check_modules(_FFMPEG_SWRESAMPLE libswresample)
-    pkg_check_modules(_FFMPEG_SWSCALE libswscale)
-  endif()
-
-  find_path(FFMPEG_AVCODEC_INCLUDE_DIR
-    NAMES libavcodec/avcodec.h
-    PATHS
-    /usr/local/include
-    /opt/local/include
-    /usr/include
-    ${_FFMPEG_AVCODEC_INCLUDE_DIRS}
-    NO_DEFAULT_PATH
-    PATH_SUFFIXES ffmpeg libav)
-
-  find_library(FFMPEG_LIBAVCODEC
-    NAMES avcodec
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_AVCODEC_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBAVDEVICE
-    NAMES avdevice
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_AVDEVICE_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBAVFILTER
-    NAMES avfilter
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_AVFILTER_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBAVFORMAT
-    NAMES avformat
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_AVFORMAT_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBPOSTPROC
-    NAMES postproc
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_POSTPROC_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBAVUTIL
-    NAMES avutil
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_AVUTIL_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBSWRESAMPLE
-    NAMES swresample
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_SWRESAMPLE_LIBRARY_DIRS})
-
-  find_library(FFMPEG_LIBSWSCALE
-    NAMES swscale
-    PATHS
-    /usr/local/lib
-    /opt/local/lib
-    /usr/lib
-    ${_FFMPEG_SWSCALE_LIBRARY_DIRS})
-
-  if(FFMPEG_LIBAVCODEC AND FFMPEG_LIBAVFORMAT)
-    set(FFMPEG_FOUND TRUE)
-  endif()
-
-  if(FFMPEG_FOUND)
-    set(FFMPEG_INCLUDE_DIR ${FFMPEG_AVCODEC_INCLUDE_DIR})
-    set(FFMPEG_LIBRARIES
-      ${FFMPEG_LIBAVCODEC}
-      ${FFMPEG_LIBAVDEVICE}
-      ${FFMPEG_LIBAVFILTER}
-      ${FFMPEG_LIBAVFORMAT}
-      ${FFMPEG_LIBAVPOSTPROC}
-      ${FFMPEG_LIBAVUTIL}
-      ${FFMPEG_LIBSWRESAMPLE}
-      ${FFMPEG_LIBSWSCALE})
-  endif()
-
-  if(FFMPEG_FOUND)
-    if(NOT FFMPEG_FIND_QUIETLY)
-      message(STATUS
-        "Found FFMPEG or Libav: ${FFMPEG_LIBRARIES}, ${FFMPEG_INCLUDE_DIR}")
-    endif()
-  else()
-    if(FFMPEG_FIND_REQUIRED)
-      message(FATAL_ERROR
-        "Could not find libavcodec or libavformat or libavutil")
-    endif()
-  endif()
-endif()
+find_package_handle_standard_args(FFmpeg
+  FOUND_VAR FFmpeg_FOUND
+  REQUIRED_VARS FFmpeg_LIBRARIES FFmpeg_INCLUDE_DIRS FFmpeg_LIBRARY_DIRS
+  HANDLE_COMPONENTS)
