@@ -3,7 +3,7 @@
 /*
  *  Copyright (c) 2019, GITAI Inc.
  *  All rights reserved.
- * encoder.cpp
+ * encoder_h264_x264.cpp
  * Author: Yuki Furuta <me@furushchev.ru>
  */
 
@@ -12,6 +12,7 @@
 
 #include <atomic>
 #include <iostream>
+#include <memory>
 #include <opencv2/opencv.hpp>
 
 extern "C" {
@@ -100,9 +101,9 @@ int main(int argc, char** argv)
   format_context_->oformat = output_format_;
 
   const size_t io_buffer_size = 3 * 1024;    // 3M seen elsewhere and adjudged good
-  unsigned char *io_buffer_ = new unsigned char[io_buffer_size];
+  std::vector<unsigned char> io_buffer_(io_buffer_size); // = new unsigned char[io_buffer_size];
   AVIOContext* io_ctx = avio_alloc_context(
-      io_buffer_, io_buffer_size, AVIO_FLAG_WRITE, NULL, NULL, dispatch_output_packet, NULL);
+      io_buffer_.data(), io_buffer_size, AVIO_FLAG_WRITE, NULL, NULL, dispatch_output_packet, NULL);
   if (!io_ctx) error("avio_alloc_context");
 
   io_ctx->seekable = 0;
@@ -167,9 +168,6 @@ int main(int argc, char** argv)
   frame_->format = codec_context_->pix_fmt;
   output_format_->flags |= AVFMT_NOFILE;
 
-  std::vector<uint8_t> header_buffer;
-  std::size_t header_size;
-  uint8_t *header_raw_buffer;
   // define meta data
   av_dict_set(&format_context_->metadata, "author", "gitai", 0);
   av_dict_set(&format_context_->metadata, "title", "gitai", 0);
@@ -247,7 +245,7 @@ int main(int argc, char** argv)
   avcodec_close(codec_context_);
   avcodec_free_context(&codec_context_);
   av_frame_free(&frame_);
-  delete io_buffer_;
+  // delete io_buffer_;
   av_packet_unref(&pkt);
   av_free(format_context_->pb);
   avformat_free_context(format_context_);

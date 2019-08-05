@@ -17,8 +17,8 @@ include_directories(
   ${FFmpeg_INCLUDE_DIRS})
 
 ## Declare a C++ library
-add_executable(encoder src/encoder.cpp)
+add_executable(encoder_h264_x264 src/encoder_h264_x264.cpp)
 
-target_link_libraries(encoder
+target_link_libraries(encoder_h264_x264
   ${OpenCV_LIBRARIES}
   ${FFmpeg_LIBRARIES})
